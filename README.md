@@ -3,9 +3,12 @@
 
 # svelte-dnd
 
-[![Svelte 5](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev)
-[![Bun](https://img.shields.io/badge/Bun-1.x-000000?logo=bun&logoColor=white)](https://bun.sh)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![npm version](https://img.shields.io/npm/v/svelte-dnd?color=CB3837&logo=npm&logoColor=white)](https://www.npmjs.com/package/svelte-dnd)
+[![Svelte](https://img.shields.io/badge/Svelte-%5E5.54.0-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev)
+[![SvelteKit](https://img.shields.io/badge/SvelteKit-%5E2.50.2-FF3E00?logo=svelte&logoColor=white)](https://kit.svelte.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-%5E5.9.3-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-%5E7.3.1-646CFF?logo=vite&logoColor=white)](https://vite.dev)
+[![Bun](https://img.shields.io/badge/Bun-workspace-000000?logo=bun&logoColor=white)](https://bun.sh)
 
 </div>
 
