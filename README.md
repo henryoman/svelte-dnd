@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./logos/d915022e-9757-49b0-8d67-abbf0628554c.jpg" alt="Svelte-DND logo" width="900" />
+  <img src="./logos/ed7e03e9-4855-4f09-955b-ae6c25f0f16e.png" alt="Svelte-DND logo" width="1200" />
 
 # svelte-dnd
 
@@ -16,6 +16,18 @@ A TypeScript-first, Svelte 5 drag-and-drop workspace with two focused projects:
 
 - **`lib/`**: the publishable `svelte-dnd` package.
 - **`site/`**: the local playground/docs surface for testing and demoing behavior.
+
+## Why Svelte over React for this project?
+
+For a drag-and-drop library like `svelte-dnd`, Svelte is a strong fit because it compiles reactivity at build time rather than relying on a heavyweight runtime reconciliation step. That keeps component logic close to the DOM behavior and makes pointer-driven interactions easier to reason about.
+
+In practice for this repo, that means:
+
+- less framework ceremony around rapidly changing drag state,
+- direct, readable component code for hit-testing and transform updates,
+- smaller integration surface for consumers who just want native-feeling DnD behavior.
+
+React is still excellent for many apps, but for this specific package's goals (tight interaction loops, low overhead, and clean component ergonomics), Svelte gives us a simpler path.
 
 ---
 
