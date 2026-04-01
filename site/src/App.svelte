@@ -15,7 +15,6 @@
 		label: string;
 		note: string;
 		theme: CardTheme;
-		pixelSnap: boolean;
 		settleMs: number;
 		width: number;
 		height: number;
@@ -25,19 +24,17 @@
 		{
 			id: 'raw',
 			label: 'Raw follow',
-			note: 'No snap and no settle. This is the clean latency read.',
+			note: 'Clean direct follow with no settle after release.',
 			theme: 'burnt',
-			pixelSnap: false,
 			settleMs: 0,
 			width: 176,
 			height: 176
 		},
 		{
 			id: 'snap',
-			label: 'Pixel snap',
-			note: 'Snaps to integer movement so you can feel quantization immediately.',
+			label: 'Standard box',
+			note: 'Reference box for comparing drag feel on the shared board.',
 			theme: 'slate',
-			pixelSnap: true,
 			settleMs: 0,
 			width: 168,
 			height: 168
@@ -47,7 +44,6 @@
 			label: 'Soft settle',
 			note: 'Direct while dragging, but eases into place after release.',
 			theme: 'cream',
-			pixelSnap: false,
 			settleMs: 160,
 			width: 182,
 			height: 182
@@ -55,9 +51,8 @@
 		{
 			id: 'micro',
 			label: 'Micro precision',
-			note: 'Smaller box with snap and short settle for precision checking.',
+			note: 'Smaller box for tighter precision checks.',
 			theme: 'ink',
-			pixelSnap: true,
 			settleMs: 90,
 			width: 116,
 			height: 116
@@ -135,12 +130,18 @@
 					<div
 						class={`card ${card.theme} ${card.settleMs > 0 ? 'settle' : ''}`}
 						class:active={snapshot.active?.nodeId === card.id}
+						class:compact={card.width < 140}
 						style={`--settle-ms:${card.settleMs}ms; width:${card.width}px; height:${card.height}px;`}
-						{@attach draggable({ controller, id: card.id, onCommit: recordCommit })}
-					>
+						{@attach draggable({
+							controller,
+							id: card.id,
+							lockAspectRatio,
+							onCommit: recordCommit
+						})}
+						>
 						<div class="card-top">
 							<p>{card.label}</p>
-							<span>{card.pixelSnap ? 'snap' : 'free'}</span>
+							<span>{card.width}x{card.height}</span>
 						</div>
 
 						<p class="card-note">{card.note}</p>
@@ -155,11 +156,11 @@
 								type="button"
 								class="handle se"
 								aria-label={`Resize ${card.label}`}
+								style={`--handle-scale-x:${1 / Math.max(transform?.scaleX ?? 1, 0.001)}; --handle-scale-y:${1 / Math.max(transform?.scaleY ?? 1, 0.001)};`}
 								{@attach resizeHandle({
 									controller,
 									id: card.id,
 									handle: 'se',
-									lockAspectRatio,
 									onCommit: recordCommit
 								})}
 							></button>
@@ -181,12 +182,12 @@
 			</section>
 
 			<section class="panel">
-				<p class="eyebrow">Variants</p>
+				<p class="eyebrow">Boxes</p>
 				<ul>
 					{#each cards as card}
 						<li>
 							<strong>{card.label}</strong>
-							<span>{card.pixelSnap ? 'snapped movement' : 'free movement'}</span>
+							<span>{card.width} x {card.height}</span>
 							<span>{card.settleMs > 0 ? `${card.settleMs}ms settle` : 'no settle'}</span>
 						</li>
 					{/each}
@@ -210,14 +211,26 @@
 </section>
 
 <style>
+	:global(:root) {
+		--bg: #efece5;
+		--surface: #f8f6f0;
+		--surface-strong: #f3f0e9;
+		--line: #c9c1b4;
+		--line-strong: #9e9485;
+		--text: #171512;
+		--muted: #5d554c;
+		--accent: #9f5930;
+		--accent-soft: #e8ddd4;
+		--mono: 'IBM Plex Mono', 'SFMono-Regular', 'Menlo', monospace;
+		--sans: 'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif;
+		--display: 'Arial Black', 'Avenir Next Condensed', 'Helvetica Neue', sans-serif;
+	}
+
 	:global(body) {
 		margin: 0;
-		font-family: 'Iowan Old Style', 'Palatino Linotype', serif;
-		background:
-			radial-gradient(circle at 20% 0%, rgba(251, 187, 111, 0.16), transparent 34%),
-			radial-gradient(circle at 100% 20%, rgba(108, 138, 156, 0.18), transparent 28%),
-			linear-gradient(180deg, #f7f1e8 0%, #ebe1d3 100%);
-		color: #201a16;
+		font-family: var(--sans);
+		background: var(--bg);
+		color: var(--text);
 	}
 
 	:global(button) {
@@ -234,15 +247,14 @@
 	.hero,
 	.board-wrap,
 	.panel {
-		border: 1px solid rgba(53, 41, 33, 0.12);
-		background: rgba(255, 250, 244, 0.74);
-		backdrop-filter: blur(16px);
-		box-shadow: 0 24px 60px rgba(71, 55, 43, 0.12);
+		border: 1px solid var(--line);
+		background: var(--surface);
+		box-shadow: none;
 	}
 
 	.hero {
-		padding: 1.45rem 1.6rem;
-		border-radius: 1.7rem;
+		padding: 1.35rem 1.45rem;
+		border-radius: 0;
 		display: flex;
 		flex-wrap: wrap;
 		align-items: end;
@@ -253,24 +265,28 @@
 	.eyebrow {
 		margin: 0 0 0.45rem;
 		font-size: 0.74rem;
-		letter-spacing: 0.2em;
+		letter-spacing: 0.16em;
 		text-transform: uppercase;
-		color: #9f5d2b;
+		color: #111;
+		font-family: var(--mono);
 	}
 
 	h1 {
 		margin: 0;
-		font-size: clamp(2.3rem, 6vw, 4.6rem);
-		line-height: 0.94;
-		max-width: 12ch;
+		font-size: clamp(2rem, 4.8vw, 3.4rem);
+		line-height: 0.98;
+		max-width: 13ch;
+		font-family: var(--display);
+		font-weight: 900;
+		letter-spacing: -0.06em;
 	}
 
 	.lede {
 		margin: 0.9rem 0 0;
 		max-width: 50rem;
-		font-size: 1rem;
+		font-size: 0.98rem;
 		line-height: 1.5;
-		color: #615248;
+		color: var(--muted);
 	}
 
 	.controls {
@@ -285,15 +301,39 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.7rem;
-		padding: 0.85rem 1rem;
-		border-radius: 999px;
-		border: 1px solid rgba(53, 41, 33, 0.14);
-		background: rgba(255, 255, 255, 0.78);
+		padding: 0.75rem 0.9rem;
+		min-height: 3rem;
+		box-sizing: border-box;
+		border-radius: 0;
+		border: 1px solid var(--line-strong);
+		background: var(--surface-strong);
+		box-shadow: none;
+		font-family: var(--mono);
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text);
+		transition:
+			border-color 120ms ease,
+			background-color 120ms ease;
+	}
+
+	.controls button {
+		cursor: pointer;
+	}
+
+	.controls button:hover,
+	.switch:hover {
+		border-color: var(--accent);
+		background: var(--accent-soft);
 	}
 
 	.switch input {
 		width: 1rem;
 		height: 1rem;
+		margin: 0;
+		flex: 0 0 auto;
+		accent-color: #111;
 	}
 
 	.workspace {
@@ -304,18 +344,18 @@
 
 	.board-wrap {
 		padding: 1rem;
-		border-radius: 1.55rem;
+		border-radius: 0;
 	}
 
 	.board {
 		position: relative;
 		min-height: 44rem;
 		overflow: hidden;
-		border-radius: 1.2rem;
+		border-radius: 0;
+		border: 1px solid var(--line);
 		background:
-			linear-gradient(rgba(127, 101, 77, 0.11) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(127, 101, 77, 0.11) 1px, transparent 1px),
-			linear-gradient(180deg, #faf4ea 0%, #f2e5d3 100%);
+			linear-gradient(rgba(129, 119, 108, 0.12) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(129, 119, 108, 0.12) 1px, transparent 1px), var(--surface);
 		background-size:
 			24px 24px,
 			24px 24px,
@@ -324,7 +364,8 @@
 
 	:global(.board[data-dnd-over='true']),
 	:global(.panel[data-dnd-over='true']) {
-		box-shadow: inset 0 0 0 2px rgba(173, 95, 43, 0.38);
+		outline: 2px solid var(--accent);
+		outline-offset: -2px;
 	}
 
 	.board-tag {
@@ -332,12 +373,14 @@
 		top: 0.9rem;
 		left: 0.9rem;
 		padding: 0.3rem 0.55rem;
-		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.82);
+		border-radius: 0;
+		border: 1px solid var(--line);
+		background: var(--surface-strong);
 		font-size: 0.72rem;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		color: #745f51;
+		color: var(--muted);
+		font-family: var(--mono);
 	}
 
 	.card {
@@ -345,22 +388,24 @@
 		top: 0;
 		left: 0;
 		padding: 1rem;
-		border-radius: 1.2rem;
-		border: 1px solid rgba(36, 29, 24, 0.12);
-		box-shadow: 0 18px 28px rgba(53, 39, 30, 0.16);
+		border-radius: 0;
+		border: 1px solid var(--line-strong);
+		box-shadow: none;
 		user-select: none;
+		outline: 1px solid rgba(23, 21, 18, 0.06);
+		outline-offset: -1px;
 	}
 
 	.card.settle:not(.active) {
 		transition:
 			transform var(--settle-ms) cubic-bezier(0.22, 1, 0.36, 1),
-			box-shadow 140ms ease;
+			border-color 120ms ease;
 	}
 
 	.card.active {
-		box-shadow:
-			0 24px 36px rgba(53, 39, 30, 0.2),
-			0 0 0 2px rgba(173, 95, 43, 0.24);
+		outline: 2px solid var(--accent);
+		outline-offset: -2px;
+		border-color: var(--accent);
 	}
 
 	.card-top,
@@ -377,8 +422,10 @@
 	}
 
 	.card-top p {
-		font-size: 1rem;
-		font-weight: 700;
+		font-size: 0.98rem;
+		font-family: var(--display);
+		font-weight: 900;
+		letter-spacing: -0.03em;
 	}
 
 	.card-top span,
@@ -386,18 +433,51 @@
 		font-size: 0.76rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
-		opacity: 0.82;
+		opacity: 0.9;
+		font-family: var(--mono);
 	}
 
 	.card-note {
 		margin-top: 0.7rem;
-		font-size: 0.92rem;
+		font-size: 0.9rem;
 		line-height: 1.42;
 		max-width: 22ch;
+		color: #3e3831;
 	}
 
 	.card-meta {
 		margin-top: 1rem;
+	}
+
+	.card.compact {
+		padding: 0.7rem;
+	}
+
+	.card.compact .card-top {
+		align-items: start;
+	}
+
+	.card.compact .card-top p {
+		font-size: 0.78rem;
+		line-height: 1.02;
+		max-width: 7ch;
+	}
+
+	.card.compact .card-top span,
+	.card.compact .card-meta span {
+		font-size: 0.64rem;
+		letter-spacing: 0.08em;
+	}
+
+	.card.compact .card-note {
+		margin-top: 0.5rem;
+		font-size: 0.72rem;
+		line-height: 1.28;
+		max-width: 14ch;
+	}
+
+	.card.compact .card-meta {
+		margin-top: 0.75rem;
 	}
 
 	.handles {
@@ -412,37 +492,31 @@
 		bottom: -8px;
 		width: 18px;
 		height: 18px;
-		border: 0;
-		border-radius: 999px;
-		background: #fff8ef;
-		box-shadow: 0 0 0 1px rgba(53, 41, 33, 0.18);
+		border: 1px solid var(--line-strong);
+		border-radius: 0;
+		background: var(--surface);
+		box-shadow: none;
 		pointer-events: auto;
+		transform: scale(var(--handle-scale-x, 1), var(--handle-scale-y, 1));
+		transform-origin: center;
 	}
 
 	.burnt {
-		background:
-			linear-gradient(135deg, rgba(255, 252, 247, 0.92), rgba(255, 252, 247, 0.28)),
-			linear-gradient(145deg, #af6433, #f0c28b);
+		background: #e8cfbd;
 	}
 
 	.slate {
-		background:
-			linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.22)),
-			linear-gradient(160deg, #3f5560, #8da5b1);
-		color: #fbf7f3;
+		background: #c5d0d0;
+		color: #172126;
 	}
 
 	.cream {
-		background:
-			linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 252, 247, 0.64)),
-			linear-gradient(145deg, #f3ddb7, #fff2dc);
+		background: #e6d8b7;
 	}
 
 	.ink {
-		background:
-			linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2)),
-			linear-gradient(145deg, #2a292f, #7b7791);
-		color: #fbf8ff;
+		background: #d1ccd8;
+		color: #18151f;
 	}
 
 	.sidebar {
@@ -453,7 +527,7 @@
 
 	.panel {
 		padding: 1.1rem;
-		border-radius: 1.3rem;
+		border-radius: 0;
 	}
 
 	.panel ul {
@@ -466,7 +540,7 @@
 
 	.panel li {
 		padding-top: 0.75rem;
-		border-top: 1px solid rgba(53, 41, 33, 0.08);
+		border-top: 1px solid rgba(53, 41, 33, 0.12);
 		display: grid;
 		gap: 0.2rem;
 	}
@@ -480,7 +554,8 @@
 		font-size: 0.76rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
-		color: #7a6657;
+		color: #786c60;
+		font-family: var(--mono);
 	}
 
 	.panel span,
@@ -492,7 +567,7 @@
 
 	.empty {
 		margin: 0;
-		color: #65564d;
+		color: var(--muted);
 	}
 
 	@media (max-width: 980px) {

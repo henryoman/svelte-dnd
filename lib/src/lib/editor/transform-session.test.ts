@@ -77,7 +77,7 @@ describe('updateTransformSession', () => {
 
 		expect(next.x).toBe(0);
 		expect(next.y).toBe(0);
-		expect(next.scaleX).toBeCloseTo(1.4);
-		expect(next.scaleY).toBeCloseTo(0.9333333333333335);
+		expect(next.scaleX).toBeCloseTo(1.32);
+		expect(next.scaleY).toBeCloseTo(0.88);
 	});
 });

@@ -22,6 +22,18 @@ function clampScale(value: number): number {
 	return Math.max(0.01, value);
 }
 
+function axisSign(handle: ResizeHandle, positive: ResizeHandle, negative: ResizeHandle): number {
+	if (handle.includes(positive)) {
+		return 1;
+	}
+
+	if (handle.includes(negative)) {
+		return -1;
+	}
+
+	return 0;
+}
+
 export function updateTransformSession(
 	options: TransformSessionOptions,
 	pointerCurrent: Point
@@ -43,38 +55,20 @@ export function updateTransformSession(
 		const pixelSnap = options.pixelSnap ?? false;
 
 		if (options.lockAspectRatio) {
-			const candidateScaleX = handle.includes('e')
-				? options.transformStart.scaleX + deltaX / 100
-				: handle.includes('w')
-					? options.transformStart.scaleX - deltaX / 100
-					: options.transformStart.scaleX;
-			const candidateScaleY = handle.includes('s')
-				? options.transformStart.scaleY + deltaY / 100
-				: handle.includes('n')
-					? options.transformStart.scaleY - deltaY / 100
-					: options.transformStart.scaleY;
-			const factorFromX =
-				options.transformStart.scaleX === 0
-					? 1
-					: clampScale(candidateScaleX) / options.transformStart.scaleX;
-			const factorFromY =
-				options.transformStart.scaleY === 0
-					? 1
-					: clampScale(candidateScaleY) / options.transformStart.scaleY;
-			const useX =
-				(handle.includes('e') || handle.includes('w')) &&
-				((!handle.includes('n') && !handle.includes('s')) || Math.abs(deltaX) >= Math.abs(deltaY));
-			const factor =
-				useX || (!handle.includes('n') && !handle.includes('s')) ? factorFromX : factorFromY;
+			const horizontal = axisSign(handle, 'e', 'w');
+			const vertical = axisSign(handle, 's', 'n');
+			const activeAxes = Number(horizontal !== 0) + Number(vertical !== 0) || 1;
+			const projectedDelta = (deltaX * horizontal + deltaY * vertical) / activeAxes;
+			const factor = clampScale(1 + projectedDelta / 140);
 
 			next.scaleX = clampScale(options.transformStart.scaleX * factor);
 			next.scaleY = clampScale(options.transformStart.scaleY * factor);
 
-			if (handle.includes('w')) {
+			if (horizontal < 0) {
 				next.x = maybeSnap(options.transformStart.x + deltaX, pixelSnap);
 			}
 
-			if (handle.includes('n')) {
+			if (vertical < 0) {
 				next.y = maybeSnap(options.transformStart.y + deltaY, pixelSnap);
 			}
 

@@ -28,6 +28,14 @@ export interface ResizeHandleAttachmentOptions {
 	onCommit?: (commit: CommittedInteraction) => void;
 }
 
+function resolveLockAspectRatio(element: HTMLElement, explicit: boolean | undefined): boolean {
+	if (explicit !== undefined) {
+		return explicit;
+	}
+
+	return element.closest('[data-svelte-dnd-lock-aspect-ratio="true"]') !== null;
+}
+
 export function resizeHandle(options: ResizeHandleAttachmentOptions): Attachment<HTMLElement> {
 	return (element) => {
 		const initialCursor = element.style.cursor;
@@ -46,7 +54,7 @@ export function resizeHandle(options: ResizeHandleAttachmentOptions): Attachment
 				kind: 'resize',
 				nodeId: options.id,
 				handle: options.handle,
-				lockAspectRatio: options.lockAspectRatio ?? false,
+				lockAspectRatio: resolveLockAspectRatio(element, options.lockAspectRatio),
 				pointer: eventPoint(event),
 				transform: options.controller.getTransform(options.id)
 			});

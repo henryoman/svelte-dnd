@@ -14,6 +14,7 @@ export interface DraggableAttachmentOptions {
 	data?: Record<string, unknown>;
 	initialTransform?: TransformInput;
 	disabled?: boolean;
+	lockAspectRatio?: boolean;
 	onCommit?: (commit: CommittedInteraction) => void;
 }
 
@@ -30,6 +31,7 @@ export function draggable(options: DraggableAttachmentOptions): Attachment<HTMLE
 		const unbindPreview = bindPreviewTransform(element, options.controller, options.id);
 		const initialCursor = element.style.cursor;
 		element.style.cursor = 'grab';
+		element.dataset.svelteDndLockAspectRatio = options.lockAspectRatio ? 'true' : 'false';
 
 		function onPointerDown(event: PointerEvent): void {
 			if (options.disabled || event.button !== 0) {
@@ -95,6 +97,7 @@ export function draggable(options: DraggableAttachmentOptions): Attachment<HTMLE
 			unregister();
 			unbindPreview();
 			element.style.cursor = initialCursor;
+			delete element.dataset.svelteDndLockAspectRatio;
 			element.removeEventListener('pointerdown', onPointerDown);
 			element.removeEventListener('pointermove', onPointerMove);
 			element.removeEventListener('pointerup', onPointerUp);
