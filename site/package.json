@@ -1,0 +1,21 @@
+{
+	"name": "svelte-dnd-site",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "bunx vite",
+		"build": "bunx vite build",
+		"preview": "bunx vite preview",
+		"check": "svelte-check --tsconfig ./tsconfig.json"
+	},
+	"dependencies": {
+		"svelte": "^5.54.0",
+		"svelte-dnd": "file:../lib"
+	},
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^6.2.4",
+		"svelte-check": "^4.4.2",
+		"typescript": "^5.9.3",
+		"vite": "^7.3.1"
+	}
+}

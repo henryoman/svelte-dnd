@@ -1,0 +1,7 @@
+dist
+.svelte-kit
+lib/dist
+lib/.svelte-kit
+site/dist
+site/node_modules
+site/.svelte-kit

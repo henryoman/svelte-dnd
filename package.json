@@ -1,0 +1,25 @@
+{
+	"name": "svelte-dnd-workspace",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "bun run site",
+		"web": "bun --cwd ./site dev",
+		"start": "bun run web",
+		"buildweb": "bun --cwd ./site build",
+		"checkweb": "bun --cwd ./site check",
+		"lib:build": "bun --cwd ./lib build",
+		"lib:check": "bun --cwd ./lib check",
+		"lib:test": "bun --cwd ./lib test",
+		"site": "bun run web",
+		"site:dev": "bun run site",
+		"site:build": "bun --cwd ./site build",
+		"site:check": "bun --cwd ./site check",
+		"lint": "prettier --check .",
+		"format": "prettier --write ."
+	},
+	"devDependencies": {
+		"prettier": "^3.8.1",
+		"prettier-plugin-svelte": "^3.4.1"
+	}
+}
