@@ -10,235 +10,158 @@
 
 </div>
 
-A TypeScript-first, Svelte 5 drag-and-drop workspace with two focused projects:
+`svelte-dnd` is a Svelte 5 drag-and-drop library for editor-style interfaces. It gives you a controller for interaction state plus Svelte attachments for draggable nodes, droppable regions, and resize handles.
 
-- **`lib/`**: the publishable `svelte-dnd` package.
-- **`site/`**: the local playground/docs surface for testing and demoing behavior.
+It is built for cases like:
 
-## Why Svelte over React for this project?
+- freeform canvases
+- visual editors
+- movable panels
+- resizable cards and blocks
 
-For a drag-and-drop library like `svelte-dnd`, Svelte is a strong fit because it compiles reactivity at build time rather than relying on a heavyweight runtime reconciliation step. That keeps component logic close to the DOM behavior and makes pointer-driven interactions easier to reason about.
+## Installation
 
-In practice for this repo, that means:
+`svelte-dnd` has a peer dependency on `svelte@^5`.
 
-- less framework ceremony around rapidly changing drag state,
-- direct, readable component code for hit-testing and transform updates,
-- smaller integration surface for consumers who just want native-feeling DnD behavior.
+Publishing is not live yet.
 
-React is still excellent for many apps, but for this specific package's goals (tight interaction loops, low overhead, and clean component ergonomics), Svelte gives us a simpler path.
+- Coming soon on npm
+- Placeholder package page: `https://coming-soon.invalid/svelte-dnd`
 
----
+## Quick Start
 
-## Table of Contents
+```svelte
+<script lang="ts">
+	import {
+		createEditorController,
+		draggable,
+		droppable,
+		resizeHandle,
+		type CommittedInteraction
+	} from 'svelte-dnd';
 
-- [What this repo contains](#what-this-repo-contains)
-- [Prerequisites](#prerequisites)
-- [Quick start](#quick-start)
-- [Workspace scripts (root)](#workspace-scripts-root)
-- [Library package (`lib/`)](#library-package-lib)
-- [Playground site (`site/`)](#playground-site-site)
-- [Typical development workflows](#typical-development-workflows)
-- [Formatting and code quality](#formatting-and-code-quality)
-- [Troubleshooting](#troubleshooting)
+	const controller = createEditorController({
+		initialTransforms: {
+			card: { x: 48, y: 48 }
+		}
+	});
 
----
+	let commits = $state<CommittedInteraction[]>([]);
 
-## What this repo contains
+	function handleCommit(commit: CommittedInteraction) {
+		commits = [commit, ...commits];
+	}
+</script>
 
-This repository is organized as a small Bun-powered workspace:
+<div class="canvas" {@attach droppable({ controller, id: 'canvas' })}>
+	<div
+		class="card"
+		{@attach draggable({
+			controller,
+			id: 'card',
+			onCommit: handleCommit
+		})}
+	>
+		Drag me
 
-### `lib/` (the package)
-
-Contains the actual `svelte-dnd` implementation, including:
-
-- core drag/drop/editor runtime logic,
-- Svelte attachment helpers,
-- tests,
-- package build output (`dist/`) generated from `src/lib`.
-
-### `site/` (the playground)
-
-Contains a Vite + Svelte app used to quickly validate behavior and iterate on UX. It depends on the local package via:
-
-- `"svelte-dnd": "file:../lib"`
-
-That means local package changes can be exercised in the site immediately via normal build/dev flows.
-
----
-
-## Prerequisites
-
-- **Bun** installed (recommended runtime + package manager for this repo).
-- A terminal in the repository root.
-
-Optional but recommended:
-
-- VS Code + Svelte extension
-- TypeScript tooling
-
----
-
-## Quick start
-
-From the repo root:
-
-```sh
-bun install
+		<button
+			type="button"
+			class="handle"
+			aria-label="Resize card"
+			{@attach resizeHandle({
+				controller,
+				id: 'card',
+				handle: 'se',
+				onCommit: handleCommit
+			})}
+		></button>
+	</div>
+</div>
 ```
 
-Run the playground site:
+## How It Works
 
-```sh
-bun run site:dev
-```
+1. Create a controller with `createEditorController(...)`.
+2. Register draggable elements with `draggable(...)`.
+3. Register drop zones with `droppable(...)`.
+4. Add one or more `resizeHandle(...)` attachments when an item should be resizable.
+5. Use `onCommit` or `controller.subscribe(...)` to react to completed interactions and live state.
 
-Build and validate the library package:
+During pointer movement the library maintains preview transforms for immediate visual feedback. On release it commits the interaction and reports the final transform plus the active droppable target, if any.
 
-```sh
-bun run lib:check
-bun run lib:test
-bun run lib:build
-```
+## Core API
 
----
+### `createEditorController(options?)`
 
-## Workspace scripts (root)
+Creates the controller used by all attachments.
 
-Run these from `/`:
+Options:
 
-| Script               | What it does                           |
-| -------------------- | -------------------------------------- |
-| `bun run dev`        | Alias to start the site in dev mode    |
-| `bun run web`        | Runs `site` with Vite dev server       |
-| `bun run start`      | Alias for `web`                        |
-| `bun run buildweb`   | Builds the `site` app                  |
-| `bun run checkweb`   | Runs type/check pipeline for `site`    |
-| `bun run lib:build`  | Builds the publishable library package |
-| `bun run lib:check`  | Runs Svelte/TS checks for library      |
-| `bun run lib:test`   | Runs library tests                     |
-| `bun run site:dev`   | Starts the site dev server             |
-| `bun run site:build` | Production build for site              |
-| `bun run site:check` | Type/check pipeline for site           |
-| `bun run lint`       | Prettier check across workspace        |
-| `bun run format`     | Prettier write across workspace        |
+- `pixelSnap?: boolean`
+- `initialTransforms?: Record<string, TransformInput>`
 
----
+Useful instance methods:
 
-## Library package (`lib/`)
+- `subscribe(listener)` for live interaction state
+- `getSnapshot()` for current transforms and hover state
+- `getTransform(id)` to read the committed transform for a node
+- `getLiveTransform(id)` to read the current preview transform during interaction
+- `setTransform(id, transform)` to update a node programmatically
+- `commitActive()` and `cancelActive()` for manual control
 
-The library is published from `lib/` and uses Svelte package tooling.
+### `draggable(options)`
 
-### Important commands
+Makes an element draggable and registers it with the controller.
 
-```sh
-cd lib
-bun install
-bun run check
-bun run test
-bun run build
-```
+Options:
 
-### Packaging notes
+- `controller`
+- `id`
+- `initialTransform?`
+- `data?`
+- `disabled?`
+- `lockAspectRatio?`
+- `onCommit?`
 
-- Entry points resolve to `dist/index.js` and `dist/index.d.ts`.
-- `svelte-package` is used during prepack.
-- `publint` is part of the packaging validation flow.
+### `droppable(options)`
 
-### Key directories
+Registers an element as a drop target.
 
-- `lib/src/lib/` – source code for runtime, attachments, and presets.
-- `lib/dist/` – generated distribution output.
+Options:
 
----
+- `controller`
+- `id`
+- `data?`
 
-## Playground site (`site/`)
+The element receives `data-dnd-over="true"` while it is the active hover target.
 
-The site is a lightweight app for trying interactions and validating changes.
+### `resizeHandle(options)`
 
-### Important commands
+Turns an element into a resize handle for a draggable node.
 
-```sh
-cd site
-bun install
-bun run dev
-bun run check
-bun run build
-```
+Options:
 
-### Why this is useful
+- `controller`
+- `id`
+- `handle: 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'nw'`
+- `disabled?`
+- `lockAspectRatio?`
+- `onCommit?`
 
-- Fast iteration loop for drag-and-drop behavior.
-- Gives a concrete surface for QA before publishing package updates.
+## Exported Utilities
 
----
+The package also exports lower-level helpers for custom integrations:
 
-## Typical development workflows
+- `createEditorEngine`
+- `createDefaultTransform`
+- `createEditorPreset`
+- `updateTransformSession`
+- `identityTransform`
+- `transformToCss`
+- matrix and rect helpers such as `matrixToCss`, `translateMatrix`, `pointInRect`, and `rectFromDomRect`
 
-### 1) Work on package internals
+## Notes
 
-1. Start in `lib/src/lib`.
-2. Run checks/tests frequently:
-   - `bun run lib:check`
-   - `bun run lib:test`
-3. Build package output:
-   - `bun run lib:build`
-
-### 2) Validate in the playground
-
-1. Start the site dev server:
-   - `bun run site:dev`
-2. Re-test interactions after library changes.
-3. Produce a production build when ready:
-   - `bun run site:build`
-
-### 3) Final quality pass before merge
-
-1. `bun run lint`
-2. `bun run lib:check`
-3. `bun run lib:test`
-4. `bun run site:check`
-5. `bun run site:build`
-
----
-
-## Formatting and code quality
-
-This repo uses Prettier at the root and in subprojects.
-
-- Validate formatting:
-
-  ```sh
-  bun run lint
-  ```
-
-- Auto-format:
-
-  ```sh
-  bun run format
-  ```
-
----
-
-## Troubleshooting
-
-### `bun run site:dev` fails to start
-
-- Ensure dependencies are installed at root and (if needed) within `site/`.
-- Re-run `bun install` from root.
-
-### Type/check failures
-
-- Run `bun run lib:check` or `bun run site:check` directly for clearer project-specific output.
-
-### Library changes not reflected in playground
-
-- Rebuild package with `bun run lib:build`.
-- Restart `bun run site:dev` if module graph caching is stale.
-
----
-
-If you want, I can also add:
-
-- a **Getting Started (consumer)** section showing how an external Svelte project installs/uses `svelte-dnd`,
-- an **API section** generated from the current exports in `lib/src/lib/index.ts`,
-- and a **release checklist** for publishing changes safely.
+- The library targets Svelte 5 attachment syntax.
+- It is designed around freeform editor interactions rather than sortable-list abstractions.
+- The repo includes a demo site, but consumers only need the package exports shown above.
