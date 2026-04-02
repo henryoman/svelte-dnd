@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./logos/logo.png" alt="Svelte-DND logo" width="1200" />
+  <img src="./logos/logo.png" alt="Svelte-DND logo" width="800" />
 
 [![npm version](https://img.shields.io/npm/v/svelte-dnd?color=CB3837&logo=npm&logoColor=white)](https://www.npmjs.com/package/svelte-dnd)
 [![Svelte](https://img.shields.io/badge/Svelte-%5E5.54.0-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev)
