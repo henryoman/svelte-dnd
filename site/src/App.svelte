@@ -96,14 +96,14 @@
 </script>
 
 <svelte:head>
-	<title>svelte-dnd smoothness lab</title>
+	<title>SVELTE-DND PLAYGROUND</title>
 </svelte:head>
 
 <section class="shell">
 	<header class="hero">
 		<div>
-			<p class="eyebrow">Smoothness Lab</p>
-			<h1>Drag the boxes on one shared board.</h1>
+			<p class="eyebrow">SVELTE-DND PLAYGROUND</p>
+			<h1>Test the tech</h1>
 			<p class="lede">
 				Use one shared grid to compare smoothness, snapping, hover handoff, and resize behavior.
 				Resize from the bottom-right handle, and use the ratio switch when you want locked
