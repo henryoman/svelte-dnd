@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./logos/ed7e03e9-4855-4f09-955b-ae6c25f0f16e.png" alt="Svelte-DND logo" width="1200" />
+  <img src="./logos/logo.png" alt="Svelte-DND logo" width="1200" />
 
 # svelte-dnd
 
