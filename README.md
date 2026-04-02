@@ -1,8 +1,6 @@
 <div align="center">
   <img src="./logos/logo.png" alt="Svelte-DND logo" width="1200" />
 
-# svelte-dnd
-
 [![npm version](https://img.shields.io/npm/v/svelte-dnd?color=CB3837&logo=npm&logoColor=white)](https://www.npmjs.com/package/svelte-dnd)
 [![Svelte](https://img.shields.io/badge/Svelte-%5E5.54.0-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev)
 [![SvelteKit](https://img.shields.io/badge/SvelteKit-%5E2.50.2-FF3E00?logo=svelte&logoColor=white)](https://kit.svelte.dev)
