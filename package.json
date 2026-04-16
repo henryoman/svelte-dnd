@@ -19,7 +19,7 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"prettier": "^3.8.1",
-		"prettier-plugin-svelte": "^3.4.1"
+		"prettier": "^3.8.3",
+		"prettier-plugin-svelte": "^3.5.1"
 	}
 }
